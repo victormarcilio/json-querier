@@ -6,13 +6,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type testCase struct {
+type tokenTestCase struct {
 	spelling   string
 	expectedID tokenID
 }
 
 func TestNewToken_FixedTokens_ShouldBeCategorizedCorrectly(t *testing.T) {
-	testcases := []testCase{
+	testcases := []tokenTestCase{
 		{"{", OPEN_CURLY}, {"}", CLOSE_CURLY},
 		{"[", OPEN_SQUARE}, {"]", CLOSE_SQUARE},
 		{",", COMMA}, {":", SEMICOLON}, {"true", TRUE},
