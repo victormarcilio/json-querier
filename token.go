@@ -1,4 +1,4 @@
-package token
+package jsonquerier
 
 import (
 	"regexp"
@@ -19,6 +19,7 @@ const (
 	NULL
 	STRING
 	NUMBER
+	EOF
 	INVALID
 )
 
