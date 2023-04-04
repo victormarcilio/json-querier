@@ -1,6 +1,9 @@
 package token
 
-import "strconv"
+import (
+	"regexp"
+	"strconv"
+)
 
 type tokenID int
 
@@ -38,6 +41,8 @@ var getID = func() func(string) tokenID {
 		"null":  NULL,
 	}
 
+	strRegex := regexp.MustCompile("^\".*\"$")
+
 	return func(spelling string) tokenID {
 		if id, ok := spellingToID[spelling]; ok {
 			return id
@@ -45,6 +50,10 @@ var getID = func() func(string) tokenID {
 
 		if _, err := strconv.ParseFloat(spelling, 64); err == nil {
 			return NUMBER
+		}
+
+		if strRegex.Match([]byte(spelling)) {
+			return STRING
 		}
 		return INVALID
 	}

@@ -32,3 +32,13 @@ func TestNewToken_NumbersShouldBeCategorizedCorrectly(t *testing.T) {
 		require.Equal(t, NUMBER, token.ID)
 	}
 }
+
+func TestNewToken_StringssShouldBeCategorizedCorrectly(t *testing.T) {
+	strings := []string{`"some string"`, `"another string"`,
+		`"\t\n\r\\\/\"\b\f"`, `"+0.52"`}
+
+	for _, str := range strings {
+		token := newToken(str)
+		require.Equal(t, STRING, token.ID)
+	}
+}
