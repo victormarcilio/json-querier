@@ -7,22 +7,22 @@ import (
 
 const punctuations = "{}[]:,"
 
-type Scanner struct {
+type scanner struct {
 	input string
 	pos   int
 }
 
-func newScanner(input string) Scanner {
-	return Scanner{input, 0}
+func newScanner(input string) scanner {
+	return scanner{input, 0}
 }
 
-func (s *Scanner) SkipSpaces() {
+func (s *scanner) SkipSpaces() {
 	for s.pos < len(s.input) && unicode.IsSpace(rune(s.input[s.pos])) {
 		s.pos++
 	}
 }
 
-func (s *Scanner) NextNumber() token {
+func (s *scanner) NextNumber() token {
 	number := ""
 	c := s.input[s.pos]
 	for s.pos < len(s.input) && (unicode.IsDigit(rune(c)) || c == '.' || c == 'E' || c == '+' || c == '-') {
@@ -35,7 +35,7 @@ func (s *Scanner) NextNumber() token {
 	return newToken(number)
 }
 
-func (s *Scanner) NextString() token {
+func (s *scanner) NextString() token {
 	str := ""
 
 	c := s.input[s.pos]
@@ -53,7 +53,7 @@ func (s *Scanner) NextString() token {
 	return newToken(str)
 }
 
-func (s *Scanner) NextToken() token {
+func (s *scanner) NextToken() token {
 	if s.pos >= len(s.input) {
 		return token{"", EOF}
 	}
