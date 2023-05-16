@@ -9,6 +9,7 @@ type Scanner interface {
 	NextNumber() token
 	NextString() token
 	NextToken() token
+	PeekNextToken() token
 }
 
 type parser struct {
@@ -18,14 +19,33 @@ type parser struct {
 	currentToken token
 }
 
+func isSimpleValue(tk tokenID) bool {
+	return tk == FALSE || tk == TRUE || tk == NUMBER || tk == STRING || tk == NULL
+}
+
 func (p *parser) parseObject() {
 	p.scanner.SkipSpaces()
 	p.acceptToken(OPEN_CURLY)
 	p.acceptToken(STRING)
 	p.appendStr()
 	p.acceptToken(SEMICOLON)
-	p.acceptToken(STRING)
-	p.removeStr()
+	next := p.scanner.PeekNextToken()
+
+	if isSimpleValue(next.ID) {
+		p.acceptIt()
+	}
+
+	for next = p.scanner.PeekNextToken(); next.ID == COMMA; next = p.scanner.PeekNextToken() {
+		p.acceptIt()
+		p.removeStr()
+		p.acceptToken(STRING)
+		p.appendStr()
+		p.acceptToken(SEMICOLON)
+		next = p.scanner.PeekNextToken()
+		if isSimpleValue(next.ID) {
+			p.acceptIt()
+		}
+	}
 	p.acceptToken(CLOSE_CURLY)
 }
 
@@ -37,11 +57,16 @@ func (p *parser) acceptToken(expected tokenID) {
 	p.currentToken = currentToken
 }
 
+func (p *parser) acceptIt() {
+	p.currentToken = p.scanner.NextToken()
+}
+
 func Parse(input string) map[string]bool {
 	scn := newScanner(input)
 	p := parser{scanner: &scn, fields: make(map[string]bool)}
 
 	p.parseObject()
+	p.acceptToken(EOF)
 	return p.fields
 }
 

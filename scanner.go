@@ -53,6 +53,13 @@ func (s *scanner) NextString() token {
 	return newToken(str)
 }
 
+func (s *scanner) PeekNextToken() token {
+	pos := s.pos
+	token := s.NextToken()
+	s.pos = pos
+	return token
+}
+
 func (s *scanner) NextToken() token {
 	if s.pos >= len(s.input) {
 		return token{"", EOF}
