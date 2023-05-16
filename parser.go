@@ -72,17 +72,20 @@ func (p *parser) parseArray() {
 	p.addCurrentSpelling()
 	if isSimpleValue(next.ID) {
 		p.acceptIt()
+	} else if next.ID == OPEN_CURLY {
+		p.parseObject()
 	}
 	for next = p.scanner.PeekNextToken(); next.ID == COMMA; next = p.scanner.PeekNextToken() {
 		p.acceptIt()
 		next = p.scanner.PeekNextToken()
-		if !isSimpleValue(next.ID) {
-			panic("oops")
-		}
 		index++
 		p.spelling = fmt.Sprintf("%s[%d]", spelling, index)
 		p.addCurrentSpelling()
-		p.acceptIt()
+		if isSimpleValue(next.ID) {
+			p.acceptIt()
+		} else if next.ID == OPEN_CURLY {
+			p.parseObject()
+		}
 	}
 
 	p.acceptToken(CLOSE_SQUARE)

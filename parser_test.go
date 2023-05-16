@@ -59,3 +59,22 @@ func TestParseArraysWithSimpleValues(t *testing.T) {
 	got := Parse(payload)
 	require.Equal(t, expected, got)
 }
+
+func TestParseArraysWithInnerObjects(t *testing.T) {
+	payload := `
+		{
+			"Fruits": [
+				{
+					"Name": "banana",
+					"Price": 3.5
+				},
+				{
+					"Name": "grapes",
+					"Color": "green"
+				}
+			]
+		}`
+	expected := map[string]bool{"Fruits": true, "Fruits[0]": true, "Fruits[0].Name": true, "Fruits[0].Price": true, "Fruits[1]": true, "Fruits[1].Name": true, "Fruits[1].Color": true}
+	got := Parse(payload)
+	require.Equal(t, expected, got)
+}
