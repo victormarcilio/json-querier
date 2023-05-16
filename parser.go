@@ -74,6 +74,8 @@ func (p *parser) parseArray() {
 		p.acceptIt()
 	} else if next.ID == OPEN_CURLY {
 		p.parseObject()
+	} else if next.ID == OPEN_SQUARE {
+		p.parseArray()
 	}
 	for next = p.scanner.PeekNextToken(); next.ID == COMMA; next = p.scanner.PeekNextToken() {
 		p.acceptIt()
@@ -85,6 +87,8 @@ func (p *parser) parseArray() {
 			p.acceptIt()
 		} else if next.ID == OPEN_CURLY {
 			p.parseObject()
+		} else if next.ID == OPEN_SQUARE {
+			p.parseArray()
 		}
 	}
 
