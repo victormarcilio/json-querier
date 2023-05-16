@@ -19,3 +19,20 @@ func TestParseMultipleStringField(t *testing.T) {
 	got := Parse(payload)
 	require.Equal(t, expected, got)
 }
+
+func TestParseWithRecursiveObjects(t *testing.T) {
+	payload := `
+		{
+			"Book":{
+				"Title": "Untitled",
+				"Pages": 300,
+				"Author": {
+					"Name": "John Smith",
+					"Age": 35
+				}
+			}
+		}`
+	expected := map[string]bool{"Book": true, "Book.Title": true, "Book.Pages": true, "Book.Author": true, "Book.Author.Name": true, "Book.Author.Age": true}
+	got := Parse(payload)
+	require.Equal(t, expected, got)
+}

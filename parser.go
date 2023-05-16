@@ -2,6 +2,7 @@ package jsonquerier
 
 import (
 	"fmt"
+	"strings"
 )
 
 type Scanner interface {
@@ -33,6 +34,8 @@ func (p *parser) parseObject() {
 
 	if isSimpleValue(next.ID) {
 		p.acceptIt()
+	} else if next.ID == OPEN_CURLY {
+		p.parseObject()
 	}
 
 	for next = p.scanner.PeekNextToken(); next.ID == COMMA; next = p.scanner.PeekNextToken() {
@@ -44,8 +47,11 @@ func (p *parser) parseObject() {
 		next = p.scanner.PeekNextToken()
 		if isSimpleValue(next.ID) {
 			p.acceptIt()
+		} else if next.ID == OPEN_CURLY {
+			p.parseObject()
 		}
 	}
+	p.removeStr()
 	p.acceptToken(CLOSE_CURLY)
 }
 
@@ -76,12 +82,17 @@ func removeQuotes(input string) string {
 
 func (p *parser) appendStr() {
 	spelling := removeQuotes(p.currentToken.spelling)
-	if p.spelling == "" {
-		p.spelling += spelling
+	if p.spelling != "" {
+		p.spelling += "."
 	}
+	p.spelling += spelling
 	p.fields[p.spelling] = true
 }
 
 func (p *parser) removeStr() {
-	p.spelling = ""
+	if ind := strings.LastIndex(p.spelling, "."); ind != -1 {
+		p.spelling = p.spelling[:ind]
+	} else {
+		p.spelling = ""
+	}
 }
