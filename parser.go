@@ -36,6 +36,8 @@ func (p *parser) parseObject() {
 		p.acceptIt()
 	} else if next.ID == OPEN_CURLY {
 		p.parseObject()
+	} else if next.ID == OPEN_SQUARE {
+		p.parseArray()
 	}
 
 	for next = p.scanner.PeekNextToken(); next.ID == COMMA; next = p.scanner.PeekNextToken() {
@@ -49,10 +51,41 @@ func (p *parser) parseObject() {
 			p.acceptIt()
 		} else if next.ID == OPEN_CURLY {
 			p.parseObject()
+		} else if next.ID == OPEN_SQUARE {
+			p.parseArray()
 		}
 	}
 	p.removeStr()
 	p.acceptToken(CLOSE_CURLY)
+}
+
+func (p *parser) parseArray() {
+	p.acceptToken(OPEN_SQUARE)
+	next := p.scanner.PeekNextToken()
+	if next.ID == CLOSE_SQUARE {
+		p.acceptIt()
+		return
+	}
+	spelling := p.spelling
+	index := 0
+	p.spelling = fmt.Sprintf("%s[%d]", spelling, index)
+	p.addCurrentSpelling()
+	if isSimpleValue(next.ID) {
+		p.acceptIt()
+	}
+	for next = p.scanner.PeekNextToken(); next.ID == COMMA; next = p.scanner.PeekNextToken() {
+		p.acceptIt()
+		next = p.scanner.PeekNextToken()
+		if !isSimpleValue(next.ID) {
+			panic("oops")
+		}
+		index++
+		p.spelling = fmt.Sprintf("%s[%d]", spelling, index)
+		p.addCurrentSpelling()
+		p.acceptIt()
+	}
+
+	p.acceptToken(CLOSE_SQUARE)
 }
 
 func (p *parser) acceptToken(expected tokenID) {
@@ -65,6 +98,10 @@ func (p *parser) acceptToken(expected tokenID) {
 
 func (p *parser) acceptIt() {
 	p.currentToken = p.scanner.NextToken()
+}
+
+func (p *parser) addCurrentSpelling() {
+	p.fields[p.spelling] = true
 }
 
 func Parse(input string) map[string]bool {

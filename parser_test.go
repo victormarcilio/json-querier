@@ -7,14 +7,25 @@ import (
 )
 
 func TestParseSingleStringField(t *testing.T) {
-	payload := `{"Name" : "Bob"}`
+	payload := `
+		{
+			"Name" : "Bob"
+		}`
 	expected := map[string]bool{"Name": true}
 	got := Parse(payload)
 	require.Equal(t, expected, got)
 }
 
 func TestParseMultipleStringField(t *testing.T) {
-	payload := `{"Name" : "Bob", "HasKids": false, "Married" : true, "Age" : 15, "Weigth" : 75.5, "Address": null}`
+	payload := `
+		{
+			"Name" : "Bob",
+			"HasKids": false,
+			"Married" : true,
+			"Age" : 15,
+			"Weigth" : 75.5,
+			"Address": null
+		}`
 	expected := map[string]bool{"Name": true, "HasKids": true, "Married": true, "Age": true, "Weigth": true, "Address": true}
 	got := Parse(payload)
 	require.Equal(t, expected, got)
@@ -33,6 +44,18 @@ func TestParseWithRecursiveObjects(t *testing.T) {
 			}
 		}`
 	expected := map[string]bool{"Book": true, "Book.Title": true, "Book.Pages": true, "Book.Author": true, "Book.Author.Name": true, "Book.Author.Age": true}
+	got := Parse(payload)
+	require.Equal(t, expected, got)
+}
+
+func TestParseArraysWithSimpleValues(t *testing.T) {
+	payload := `
+		{
+			"Colors": ["blue", "green", "black"],
+			"Numbers": [5, 3.5],
+			"Values": [true, false, null]
+		}`
+	expected := map[string]bool{"Colors": true, "Colors[0]": true, "Colors[1]": true, "Colors[2]": true, "Numbers": true, "Numbers[0]": true, "Numbers[1]": true, "Values": true, "Values[0]": true, "Values[1]": true, "Values[2]": true}
 	got := Parse(payload)
 	require.Equal(t, expected, got)
 }
