@@ -6,16 +6,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseSingleStringField(t *testing.T) {
-	payload := `
-		{
-			"Name" : "Bob"
-		}`
-	expected := map[string]bool{"Name": true}
-	got := Parse(payload)
-	require.Equal(t, expected, got)
-}
-
 func TestParseMultipleStringField(t *testing.T) {
 	payload := `
 		{
@@ -26,7 +16,8 @@ func TestParseMultipleStringField(t *testing.T) {
 			"Weigth" : 75.5,
 			"Address": null
 		}`
-	expected := map[string]bool{"Name": true, "HasKids": true, "Married": true, "Age": true, "Weigth": true, "Address": true}
+	keys := []string{"Name", "HasKids", "Married", "Age", "Weigth", "Address"}
+	expected := createMapWithExpectedKeys(keys)
 	got := Parse(payload)
 	require.Equal(t, expected, got)
 }
@@ -43,7 +34,8 @@ func TestParseWithRecursiveObjects(t *testing.T) {
 				}
 			}
 		}`
-	expected := map[string]bool{"Book": true, "Book.Title": true, "Book.Pages": true, "Book.Author": true, "Book.Author.Name": true, "Book.Author.Age": true}
+	keys := []string{"Book", "Book.Title", "Book.Pages", "Book.Author", "Book.Author.Name", "Book.Author.Age"}
+	expected := createMapWithExpectedKeys(keys)
 	got := Parse(payload)
 	require.Equal(t, expected, got)
 }
@@ -53,9 +45,13 @@ func TestParseArraysWithSimpleValues(t *testing.T) {
 		{
 			"Colors": ["blue", "green", "black"],
 			"Numbers": [5, 3.5],
+			"Empty": [],
 			"Values": [true, false, null]
 		}`
-	expected := map[string]bool{"Colors": true, "Colors[0]": true, "Colors[1]": true, "Colors[2]": true, "Numbers": true, "Numbers[0]": true, "Numbers[1]": true, "Values": true, "Values[0]": true, "Values[1]": true, "Values[2]": true}
+	keys := []string{"Colors", "Colors[0]", "Colors[1]", "Colors[2]", "Numbers", "Numbers[0]", "Numbers[1]",
+		"Empty", "Values", "Values[0]", "Values[1]", "Values[2]"}
+
+	expected := createMapWithExpectedKeys(keys)
 	got := Parse(payload)
 	require.Equal(t, expected, got)
 }
@@ -74,7 +70,9 @@ func TestParseArraysWithInnerObjects(t *testing.T) {
 				}
 			]
 		}`
-	expected := map[string]bool{"Fruits": true, "Fruits[0]": true, "Fruits[0].Name": true, "Fruits[0].Price": true, "Fruits[1]": true, "Fruits[1].Name": true, "Fruits[1].Color": true}
+	keys := []string{"Fruits", "Fruits[0]", "Fruits[0].Name", "Fruits[0].Price",
+		"Fruits[1]", "Fruits[1].Name", "Fruits[1].Color"}
+	expected := createMapWithExpectedKeys(keys)
 	got := Parse(payload)
 	require.Equal(t, expected, got)
 }
@@ -87,7 +85,17 @@ func TestParseArraysWithInnerArrays(t *testing.T) {
 				[15, null, false, true, 25.5]
 			]
 		}`
-	expected := map[string]bool{"Random": true, "Random[0]": true, "Random[0][0]": true, "Random[0][1]": true, "Random[0][2]": true, "Random[1]": true, "Random[1][0]": true, "Random[1][1]": true, "Random[1][2]": true, "Random[1][3]": true, "Random[1][4]": true}
+	keys := []string{"Random", "Random[0]", "Random[0][0]", "Random[0][1]", "Random[0][2]",
+		"Random[1]", "Random[1][0]", "Random[1][1]", "Random[1][2]", "Random[1][3]", "Random[1][4]"}
+	expected := createMapWithExpectedKeys(keys)
 	got := Parse(payload)
 	require.Equal(t, expected, got)
+}
+
+func createMapWithExpectedKeys(keys []string) map[string]bool {
+	m := make(map[string]bool)
+	for _, key := range keys {
+		m[key] = true
+	}
+	return m
 }
