@@ -111,7 +111,7 @@ func (p *parser) addCurrentSpelling() {
 	p.fields[p.spelling] = true
 }
 
-func Parse(input string) map[string]bool {
+func parse(input string) map[string]bool {
 	scn := newScanner(input)
 	p := parser{scanner: &scn, fields: make(map[string]bool)}
 
@@ -138,5 +138,12 @@ func (p *parser) removeStr() {
 		p.spelling = p.spelling[:ind]
 	} else {
 		p.spelling = ""
+	}
+}
+
+func CreateQuerier(input string) func(string) bool {
+	existing := parse(input)
+	return func(field string) bool {
+		return existing[field]
 	}
 }
