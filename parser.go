@@ -5,16 +5,8 @@ import (
 	"strings"
 )
 
-type Scanner interface {
-	SkipSpaces()
-	NextNumber() token
-	NextString() token
-	NextToken() token
-	PeekNextToken() token
-}
-
 type parser struct {
-	scanner      Scanner
+	scanner
 	fields       map[string]bool
 	spelling     string
 	currentToken token
@@ -25,12 +17,12 @@ func isSimpleValue(tk tokenID) bool {
 }
 
 func (p *parser) parseObject() {
-	p.scanner.SkipSpaces()
+	p.SkipSpaces()
 	p.acceptToken(OPEN_CURLY)
 	p.acceptToken(STRING)
 	p.appendStr()
 	p.acceptToken(SEMICOLON)
-	next := p.scanner.PeekNextToken()
+	next := p.PeekNextToken()
 
 	if isSimpleValue(next.ID) {
 		p.acceptIt()
@@ -40,13 +32,13 @@ func (p *parser) parseObject() {
 		p.parseArray()
 	}
 
-	for next = p.scanner.PeekNextToken(); next.ID == COMMA; next = p.scanner.PeekNextToken() {
+	for next = p.PeekNextToken(); next.ID == COMMA; next = p.PeekNextToken() {
 		p.acceptIt()
 		p.removeStr()
 		p.acceptToken(STRING)
 		p.appendStr()
 		p.acceptToken(SEMICOLON)
-		next = p.scanner.PeekNextToken()
+		next = p.PeekNextToken()
 		if isSimpleValue(next.ID) {
 			p.acceptIt()
 		} else if next.ID == OPEN_CURLY {
@@ -61,7 +53,7 @@ func (p *parser) parseObject() {
 
 func (p *parser) parseArray() {
 	p.acceptToken(OPEN_SQUARE)
-	next := p.scanner.PeekNextToken()
+	next := p.PeekNextToken()
 	if next.ID == CLOSE_SQUARE {
 		p.acceptIt()
 		return
@@ -77,9 +69,9 @@ func (p *parser) parseArray() {
 	} else if next.ID == OPEN_SQUARE {
 		p.parseArray()
 	}
-	for next = p.scanner.PeekNextToken(); next.ID == COMMA; next = p.scanner.PeekNextToken() {
+	for next = p.PeekNextToken(); next.ID == COMMA; next = p.PeekNextToken() {
 		p.acceptIt()
-		next = p.scanner.PeekNextToken()
+		next = p.PeekNextToken()
 		index++
 		p.spelling = fmt.Sprintf("%s[%d]", spelling, index)
 		p.addCurrentSpelling()
@@ -96,7 +88,7 @@ func (p *parser) parseArray() {
 }
 
 func (p *parser) acceptToken(expected tokenID) {
-	currentToken := p.scanner.NextToken()
+	currentToken := p.NextToken()
 	if currentToken.ID != expected {
 		panic(fmt.Errorf("expected %v got %v", expected, currentToken.ID))
 	}
@@ -104,7 +96,7 @@ func (p *parser) acceptToken(expected tokenID) {
 }
 
 func (p *parser) acceptIt() {
-	p.currentToken = p.scanner.NextToken()
+	p.currentToken = p.NextToken()
 }
 
 func (p *parser) addCurrentSpelling() {
@@ -112,8 +104,7 @@ func (p *parser) addCurrentSpelling() {
 }
 
 func parse(input string) map[string]bool {
-	scn := newScanner(input)
-	p := parser{scanner: &scn, fields: make(map[string]bool)}
+	p := parser{scanner: newScanner(input), fields: make(map[string]bool)}
 
 	p.parseObject()
 	p.acceptToken(EOF)
