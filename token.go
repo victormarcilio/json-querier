@@ -2,7 +2,6 @@ package jsonquerier
 
 import (
 	"regexp"
-	"strconv"
 )
 
 type tokenID int
@@ -41,13 +40,14 @@ var spellingToID = map[string]tokenID{
 }
 
 var strRegex = regexp.MustCompile("^\".*\"$")
+var numberRegex = regexp.MustCompile(`^-?(\d|[1-9]\d*)(\.\d+)?([Ee][-+]?\d+)?$`)
 
 func getID(spelling string) tokenID {
 	if id, ok := spellingToID[spelling]; ok {
 		return id
 	}
 
-	if _, err := strconv.ParseFloat(spelling, 64); err == nil {
+	if numberRegex.Match([]byte(spelling)) {
 		return NUMBER
 	}
 

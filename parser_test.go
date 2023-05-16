@@ -13,7 +13,7 @@ func TestParseMultipleStringField(t *testing.T) {
 			"HasKids": false,
 			"Married" : true,
 			"Age" : 15,
-			"Weigth" : 75.5,
+			"Weigth" : 75.5e-105,
 			"Address": null
 		}`
 	keys := []string{"Name", "HasKids", "Married", "Age", "Weigth", "Address"}

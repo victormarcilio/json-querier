@@ -25,7 +25,7 @@ func (s *scanner) SkipSpaces() {
 func (s *scanner) NextNumber() token {
 	number := ""
 	c := s.input[s.pos]
-	for s.pos < len(s.input) && (unicode.IsDigit(rune(c)) || c == '.' || c == 'E' || c == '+' || c == '-') {
+	for s.pos < len(s.input) && (unicode.IsDigit(rune(c)) || c == '.' || c == 'E' || c == 'e' || c == '+' || c == '-') {
 		number += string(c)
 		s.pos++
 		if s.pos < len(s.input) {

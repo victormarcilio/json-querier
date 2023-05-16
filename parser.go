@@ -108,6 +108,7 @@ func parse(input string) map[string]bool {
 
 	p.parseObject()
 	p.acceptToken(EOF)
+
 	return p.fields
 }
 
