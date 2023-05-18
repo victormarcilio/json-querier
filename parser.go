@@ -1,6 +1,8 @@
 package jsonquerier
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -10,6 +12,7 @@ type parser struct {
 	fields       map[string]bool
 	spelling     string
 	currentToken token
+	err          error
 }
 
 func isSimpleValue(tk tokenID) bool {
@@ -103,13 +106,20 @@ func (p *parser) addCurrentSpelling() {
 	p.fields[p.spelling] = true
 }
 
-func parse(input string) map[string]bool {
+func parse(input string) (map[string]bool, error) {
+	if !json.Valid([]byte(input)) {
+		return map[string]bool{}, errors.New("invalid JSON")
+	}
 	p := parser{scanner: newScanner(input), fields: make(map[string]bool)}
-
+	defer func() {
+		if err := recover(); err != nil {
+			p.fields = make(map[string]bool)
+			p.err = errors.New("some error happened on json querier")
+		}
+	}()
 	p.parseObject()
 	p.acceptToken(EOF)
-
-	return p.fields
+	return p.fields, nil
 }
 
 func trimQuotes(input string) string {
@@ -133,9 +143,9 @@ func (p *parser) removeStr() {
 	}
 }
 
-func CreateQuerier(input string) func(string) bool {
-	existing := parse(input)
+func CreateQuerier(input string) (func(string) bool, error) {
+	existing, err := parse(input)
 	return func(field string) bool {
 		return existing[field]
-	}
+	}, err
 }

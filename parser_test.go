@@ -18,8 +18,9 @@ func TestParseMultipleStringField(t *testing.T) {
 		}`
 	keys := []string{"Name", "HasKids", "Married", "Age", "Weigth", "Address"}
 	expected := createMapWithExpectedKeys(keys)
-	got := parse(payload)
+	got, err := parse(payload)
 	require.Equal(t, expected, got)
+	require.NoError(t, err)
 }
 
 func TestParseWithRecursiveObjects(t *testing.T) {
@@ -36,8 +37,9 @@ func TestParseWithRecursiveObjects(t *testing.T) {
 		}`
 	keys := []string{"Book", "Book.Title", "Book.Pages", "Book.Author", "Book.Author.Name", "Book.Author.Age"}
 	expected := createMapWithExpectedKeys(keys)
-	got := parse(payload)
+	got, err := parse(payload)
 	require.Equal(t, expected, got)
+	require.NoError(t, err)
 }
 
 func TestParseArraysWithSimpleValues(t *testing.T) {
@@ -52,8 +54,9 @@ func TestParseArraysWithSimpleValues(t *testing.T) {
 		"Empty", "Values", "Values[0]", "Values[1]", "Values[2]"}
 
 	expected := createMapWithExpectedKeys(keys)
-	got := parse(payload)
+	got, err := parse(payload)
 	require.Equal(t, expected, got)
+	require.NoError(t, err)
 }
 
 func TestParseArraysWithInnerObjects(t *testing.T) {
@@ -73,8 +76,9 @@ func TestParseArraysWithInnerObjects(t *testing.T) {
 	keys := []string{"Fruits", "Fruits[0]", "Fruits[0].Name", "Fruits[0].Price",
 		"Fruits[1]", "Fruits[1].Name", "Fruits[1].Color"}
 	expected := createMapWithExpectedKeys(keys)
-	got := parse(payload)
+	got, err := parse(payload)
 	require.Equal(t, expected, got)
+	require.NoError(t, err)
 }
 
 func TestParseArraysWithInnerArrays(t *testing.T) {
@@ -88,8 +92,9 @@ func TestParseArraysWithInnerArrays(t *testing.T) {
 	keys := []string{"Random", "Random[0]", "Random[0][0]", "Random[0][1]", "Random[0][2]",
 		"Random[1]", "Random[1][0]", "Random[1][1]", "Random[1][2]", "Random[1][3]", "Random[1][4]"}
 	expected := createMapWithExpectedKeys(keys)
-	got := parse(payload)
+	got, err := parse(payload)
 	require.Equal(t, expected, got)
+	require.NoError(t, err)
 }
 
 func TestParseCreateQuerier(t *testing.T) {
@@ -111,13 +116,27 @@ func TestParseCreateQuerier(t *testing.T) {
 	keys := []string{"Name", "Children", "Children[0]", "Children[0].Name", "Children[0].Age",
 		"Children[1]", "Children[1].Name", "Children[1].Age", "Pets", "Pets[0]", "Pets[1]"}
 	expected := createMapWithExpectedKeys(keys)
-	got := parse(payload)
+	got, err := parse(payload)
 	require.Equal(t, expected, got)
+	require.NoError(t, err)
 
-	querier := CreateQuerier(payload)
+	querier, err := CreateQuerier(payload)
+	require.NoError(t, err)
 	for _, key := range keys {
 		require.True(t, querier(key))
 	}
+}
+
+func TestParseShouldFailForInvalidJSON(t *testing.T) {
+	payload := `
+		{
+			"Name" : "Bob",
+		}`
+
+	expected := map[string]bool{}
+	got, err := parse(payload)
+	require.Equal(t, expected, got)
+	require.Error(t, err)
 }
 
 func createMapWithExpectedKeys(keys []string) map[string]bool {
