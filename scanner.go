@@ -36,20 +36,21 @@ func (s *scanner) NextNumber() token {
 }
 
 func (s *scanner) NextString() token {
-	str := ""
-
+	str := "\""
+	s.pos++
 	c := s.input[s.pos]
-	for s.pos < len(s.input) && (c != '"' || len(str) == 0) {
+	for s.pos < len(s.input) {
+		if c == '"' && s.input[s.pos-1] != '\\' {
+			break
+		}
 		str += string(c)
 		s.pos++
 		if s.pos < len(s.input) {
 			c = s.input[s.pos]
 		}
 	}
-	if c == '"' {
-		str += "\""
-		s.pos++
-	}
+	str += "\""
+	s.pos++
 	return newToken(str)
 }
 

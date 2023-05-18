@@ -112,12 +112,12 @@ func parse(input string) map[string]bool {
 	return p.fields
 }
 
-func removeQuotes(input string) string {
+func trimQuotes(input string) string {
 	return input[1 : len(input)-1]
 }
 
 func (p *parser) appendStr() {
-	spelling := removeQuotes(p.currentToken.spelling)
+	spelling := trimQuotes(p.currentToken.spelling)
 	if p.spelling != "" {
 		p.spelling += "."
 	}
